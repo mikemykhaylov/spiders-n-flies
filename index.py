@@ -132,7 +132,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
             flies.remove(spiders_pos[i])
         i += 1
 
-    print(f"g(x, {spider_move}) = {move_cost}, J(f({spiders_pos}, {flies})) = {base_policy_cost_to_go(spiders_pos.copy(), flies.copy())}")
+    # print(f"g(x, {spider_move}) = {move_cost}, J(f({spiders_pos}, {flies})) = {base_policy_cost_to_go(spiders_pos.copy(), flies.copy())}")
 
     return move_cost + base_policy_cost_to_go(spiders_pos.copy(), flies.copy())
 
