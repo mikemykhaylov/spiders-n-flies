@@ -139,30 +139,31 @@ def base_player() -> int:
         int: Total cost for all spiders to eat all flies
     """
     running = True
-    current_spider = 0
 
     running_cost = 0
 
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        if args.show:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    return running_cost
+
+        for current_spider in range(len(env.spiders)):
+            move = base_policy(env.spiders[current_spider], env.flies)
+            if move != moves.NONE:
+                running_cost += 1
+            env.move_spider(current_spider, move)
+
+            # check if all flies are eaten
+            if not any(cell for row in env.grid for cell in row):
+                print("All flies are eaten!")
                 running = False
-                return running_cost
+                break
 
-        move = base_policy(env.spiders[current_spider], env.flies)
-        if move != moves.NONE:
-            running_cost += 1
-        env.move_spider(current_spider, move)
-        current_spider = (current_spider + 1) % len(env.spiders)
-
-        # check if all flies are eaten
-        if not any(cell for row in env.grid for cell in row):
-            print("All flies are eaten!")
-            running = False
-
-        # wait for 1 second
-        viz.update_display()
-        pygame.time.wait(100)
+        if args.show:
+            viz.update_display()
+            pygame.time.wait(1000)
 
     return running_cost
 
@@ -200,8 +201,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout'],
                        default='base', help='Mode: manual, base, rollout, or marollout')
+    parser.add_argument('-s', '--show', action='store_true', help='Show visualization')
     parser.add_argument('--seed', type=int, help='Random seed')
     args = parser.parse_args()
+    if args.mode == 'manual':
+        # set show to True for manual mode
+        args.show = True
 
     if not args.seed:
         args.seed = random.randint(0, 1000000)
@@ -211,10 +216,11 @@ if __name__ == "__main__":
 
     # Initialize environment with 5 flies and 2 spiders
     env = GridEnvironment(k=5, spider_positions=[(6,0), (6,0)])
-    viz = GridVisualization(env)
 
-    pygame.event.set_allowed(None)
-    pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+    if args.show:
+        viz = GridVisualization(env)
+        pygame.event.set_allowed(None)
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
 
     if args.mode == 'manual':
         interactive_player()
