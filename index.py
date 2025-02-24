@@ -224,6 +224,7 @@ if __name__ == "__main__":
         viz = GridVisualization(env)
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+        viz.update_display()
 
     if args.mode == 'manual':
         interactive_player()
