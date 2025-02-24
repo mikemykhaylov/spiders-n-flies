@@ -22,7 +22,7 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
     nearest_fly = None
 
     # Find nearest fly using Manhattan distance
-    for fly_pos in flies:
+    for fly_pos in sorted(flies):
         fly_x, fly_y = fly_pos
         distance = abs(spider_x - fly_x) + abs(spider_y - fly_y)
         if distance < min_distance:
