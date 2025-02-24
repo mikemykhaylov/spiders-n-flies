@@ -15,7 +15,7 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
         flies: Set of (x, y) coordinates for all flies
 
     Returns:
-        str: One of 'UP', 'DOWN', 'LEFT', 'RIGHT'
+        str: One of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NONE' moves
     """
     spider_x, spider_y = spider_pos
     min_distance = float('inf')
@@ -48,7 +48,9 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
     if dy != 0:
         return moves.DOWN if dy > 0 else moves.UP
 
-    return moves.NONE  # Default if spider is already at fly position
+    # should never reach here
+    print(f"Spider at {spider_pos} is already at fly position {nearest_fly}")
+    raise ValueError("Spider is already at fly position")
 
 def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]]) -> int:
     """
