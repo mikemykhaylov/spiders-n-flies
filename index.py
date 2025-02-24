@@ -298,32 +298,33 @@ if __name__ == "__main__":
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
         viz.update_display()
 
-    if args.mode == 'manual':
-        interactive_player()
-    elif args.mode == 'base':
-        predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-        actual_cost = base_player()
-
-        print(f"Predicted cost: {predicted_cost}")
-        print(f"Actual cost: {actual_cost}")
-    elif args.mode == 'marollout':
-        predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-        actual_cost = marollout_player()
-
-        print(f"Predicted cost: {predicted_cost}")
-        print(f"Actual cost: {actual_cost}")
-    elif args.mode == 'test':
-        for i in range(100000):
-            seed = random.randint(0, 100000000)
-            random.seed(seed)
-            env.reset(k=5, spider_positions=[(6,0), (6,0)])
-            if i % 10000 == 0:
-                print(env.flies)
+    match args.mode:
+        case 'manual':
+            interactive_player()
+        case 'base':
             predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
             actual_cost = base_player()
-            if predicted_cost != actual_cost:
-                print(f"Seed: {seed}, Predicted cost: {predicted_cost}, Actual cost: {actual_cost}")
-                break
+
+            print(f"Predicted cost: {predicted_cost}")
+            print(f"Actual cost: {actual_cost}")
+        case 'marollout':
+            predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
+            actual_cost = marollout_player()
+
+            print(f"Predicted cost: {predicted_cost}")
+            print(f"Actual cost: {actual_cost}")
+        case 'test':
+            for i in range(100000):
+                seed = random.randint(0, 100000000)
+                random.seed(seed)
+                env.reset(k=5, spider_positions=[(6,0), (6,0)])
+                if i % 10000 == 0:
+                    print(env.flies)
+                predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
+                actual_cost = base_player()
+                if predicted_cost != actual_cost:
+                    print(f"Seed: {seed}, Predicted cost: {predicted_cost}, Actual cost: {actual_cost}")
+                    break
 
     pygame.quit()
     sys.exit()
