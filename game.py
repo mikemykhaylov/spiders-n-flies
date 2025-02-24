@@ -11,8 +11,9 @@ class moves(Enum):
     NONE = 'NONE'
 
 class GridEnvironment:
-    def __init__(self, k: int, spider_positions: List[Tuple[int, int]]):
+    def __init__(self, k: int, spider_positions: List[Tuple[int, int]], wait_delay: int = 1000):
         self.grid_size = 10
+        self.wait_delay = wait_delay
         self.reset(k, spider_positions)
 
     def reset(self, k: int, spider_positions: List[Tuple[int, int]]) -> None:
@@ -65,6 +66,9 @@ class GridEnvironment:
         new_x = max(0, min(self.grid_size - 1, x + dx))
         new_y = max(0, min(self.grid_size - 1, y + dy))
         return (new_x, new_y)
+
+    def wait(self):
+        pygame.time.wait(self.wait_delay)
 
 class GridVisualization:
     def __init__(self, env: GridEnvironment, cell_size: int = 80):

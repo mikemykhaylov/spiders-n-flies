@@ -193,7 +193,7 @@ def base_player() -> int:
 
         if args.show:
             viz.update_display()
-            pygame.time.wait(1000)
+            env.wait()
 
     return running_cost
 
@@ -237,7 +237,7 @@ def marollout_player() -> int:
 
         if args.show:
             viz.update_display()
-            pygame.time.wait(1000)
+            env.wait()
 
     return running_cost
 
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     random.seed(args.seed)
 
     # Initialize environment with 5 flies and 2 spiders
-    env = GridEnvironment(k=5, spider_positions=[(6,0), (6,0)])
+    env = GridEnvironment(k=5, spider_positions=[(6,0), (6,0)], wait_delay=100)
 
     if args.show:
         viz = GridVisualization(env)
