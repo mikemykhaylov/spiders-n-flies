@@ -72,22 +72,12 @@ def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[
                 # No flies left to eat
                 break
 
-            x, y = spider_pos
-
-            if move == moves.UP:
-                y -= 1
-            elif move == moves.DOWN:
-                y += 1
-            elif move == moves.LEFT:
-                x -= 1
-            elif move == moves.RIGHT:
-                x += 1
-
-            spiders_pos[i] = (x, y)
+            spiders_pos[i] = env.apply_spider_move(spider_pos, move)
             total_cost += 1
 
-            if (x, y) in flies:
-                flies.remove((x, y))
+            if spiders_pos[i] in flies:
+                flies.remove(spiders_pos[i])
+
 
     return total_cost
 
