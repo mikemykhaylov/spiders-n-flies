@@ -28,6 +28,10 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
         if distance < min_distance:
             min_distance = distance
             nearest_fly = fly_pos
+        elif distance == min_distance and nearest_fly:
+            # Prefer horizontal movement over vertical when distances are equal
+            if abs(nearest_fly[0] - spider_x) < abs(fly_x - spider_x):
+                nearest_fly = fly_pos
 
     if nearest_fly is None:
         return moves.NONE
