@@ -2,6 +2,8 @@ import pygame
 import random
 import sys
 import argparse
+import itertools
+
 from game import GridEnvironment, GridVisualization, moves
 from typing import List, Tuple
 
@@ -134,7 +136,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
 
     return move_cost + base_policy_cost_to_go(spiders_pos.copy(), flies.copy())
 
-def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]], prev_moves: List[moves] = []) -> moves:
+def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]], prev_moves: List[moves] = []) -> moves:
     """
     Find best move by minimizing over all possible moves for the current spider with a rollout policy.
 
@@ -159,6 +161,29 @@ def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int
     print(f"Best move: {best_move}, cost: {min_cost}")
 
     return best_move
+
+def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]]) -> List[moves]:
+    """
+    Finds best combination of moves for all spiders by minimizing over all possible moves for all spiders.
+
+    Args:
+        spiders_pos: List of spider positions as (x, y) coordinates
+        flies: Set of (x, y) coordinates for all flies
+
+    Returns:
+        List[moves]: List of moves for all spiders
+    """
+    n = len(spiders_pos)
+    min_cost = float('inf')
+    best_moves = [moves.NONE] * len(spiders_pos)
+
+    for move_combination in itertools.product(moves, repeat=len(spiders_pos)):
+        cost = move_cost_to_go(spiders_pos.copy(), flies.copy(), [move for move in move_combination[:n - 1]], move_combination[n-1])
+        if cost < min_cost:
+            min_cost = cost
+            best_moves = [move for move in move_combination]
+
+    return best_moves
 
 def base_player() -> int:
     """
@@ -219,7 +244,7 @@ def marollout_player() -> int:
 
         spiders, flies = env.spiders.copy(), env.flies.copy()
         for current_spider in range(len(env.spiders)):
-            move = rollout_policy(spiders, flies, prev_moves)
+            move = marollout_policy(spiders, flies, prev_moves)
             if move != moves.NONE:
                 running_cost += 1
             env.move_spider(current_spider, move)
@@ -234,6 +259,45 @@ def marollout_player() -> int:
                 prev_moves = []
             else:
                 prev_moves.append(move)
+
+        if args.show:
+            viz.update_display()
+            env.wait()
+
+    return running_cost
+
+def rollout_player() -> int:
+    """
+    Run base policy for all spiders until all flies are eaten.
+    Returns total cost for all spiders to eat all flies.
+
+    Returns:
+        int: Total cost for all spiders to eat all flies
+    """
+    running = True
+    running_cost = 0
+
+    while running:
+        if args.show:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    return running_cost
+
+        spiders, flies = env.spiders.copy(), env.flies.copy()
+        spider_moves = rollout_policy(spiders, flies)
+
+        for i in range(len(env.spiders)):
+            move = spider_moves[i]
+            if move != moves.NONE:
+                running_cost += 1
+            env.move_spider(i, move)
+
+            # check if all flies are eaten
+            if not any(cell for row in env.grid for cell in row):
+                # print("All flies are eaten!")
+                running = False
+                break
 
         if args.show:
             viz.update_display()
@@ -310,6 +374,12 @@ if __name__ == "__main__":
         case 'marollout':
             predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
             actual_cost = marollout_player()
+
+            print(f"Predicted cost: {predicted_cost}")
+            print(f"Actual cost: {actual_cost}")
+        case 'rollout':
+            predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
+            actual_cost = rollout_player()
 
             print(f"Predicted cost: {predicted_cost}")
             print(f"Actual cost: {actual_cost}")
