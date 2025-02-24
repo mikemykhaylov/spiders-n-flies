@@ -22,6 +22,11 @@ class GridEnvironment:
 
         # Place flies in random unique positions
         all_cells = [(x, y) for x in range(self.grid_size) for y in range(self.grid_size)]
+        # Remove spider positions
+        for pos in self.spiders:
+            if pos in all_cells:
+                all_cells.remove(pos)
+
         random.shuffle(all_cells)
         self.flies = set(all_cells[:k])
         for x, y in all_cells[:k]:
