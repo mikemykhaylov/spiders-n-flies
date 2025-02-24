@@ -157,7 +157,7 @@ def base_player() -> int:
 
             # check if all flies are eaten
             if not any(cell for row in env.grid for cell in row):
-                print("All flies are eaten!")
+                # print("All flies are eaten!")
                 running = False
                 break
 
@@ -192,16 +192,17 @@ def interactive_player():
 
         # check if all flies are eaten
         if not any(cell for row in env.grid for cell in row):
-            print("All flies are eaten!")
+            # print("All flies are eaten!")
             running = False
 
         viz.update_display()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout'],
+    parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout', 'test'],
                        default='base', help='Mode: manual, base, rollout, or marollout')
     parser.add_argument('-s', '--show', action='store_true', help='Show visualization')
+    parser.add_argument('-t', '--test', action='store_true', help='Run tests')
     parser.add_argument('--seed', type=int, help='Random seed')
     args = parser.parse_args()
     if args.mode == 'manual':
@@ -210,8 +211,8 @@ if __name__ == "__main__":
 
     if not args.seed:
         args.seed = random.randint(0, 1000000)
-
-    print(f"Random seed: {args.seed}")
+    if args.mode != 'test':
+        print(f"Random seed: {args.seed}")
     random.seed(args.seed)
 
     # Initialize environment with 5 flies and 2 spiders
@@ -233,6 +234,18 @@ if __name__ == "__main__":
     elif args.mode == 'marollout':
         predicted_cost = move_cost_to_go(env.spiders.copy(), env.flies.copy(), spider_move=moves.UP)
         print(f"Predicted cost: {predicted_cost}")
+    elif args.mode == 'test':
+        for i in range(100000):
+            seed = random.randint(0, 100000000)
+            random.seed(seed)
+            env.reset(k=5, spider_positions=[(6,0), (6,0)])
+            if i % 10000 == 0:
+                print(env.flies)
+            predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
+            actual_cost = base_player()
+            if predicted_cost != actual_cost:
+                print(f"Seed: {seed}, Predicted cost: {predicted_cost}, Actual cost: {actual_cost}")
+                break
 
     pygame.quit()
     sys.exit()
