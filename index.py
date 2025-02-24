@@ -103,7 +103,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
 
     i = 0
     while i < len(prev_moves):
-        print(f"Using previous move {prev_moves[i]} for spider {i}")
+        # print(f"Using previous move {prev_moves[i]} for spider {i}")
         if prev_moves[i] != moves.NONE:
             move_cost += 1
         spiders_pos[i] = env.apply_spider_move(spiders_pos[i], prev_moves[i])
@@ -111,7 +111,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
             flies.remove(spiders_pos[i])
         i += 1
 
-    print(f"Using spider move {spider_move} for spider {i}")
+    # print(f"Using spider move {spider_move} for spider {i}")
     if spider_move != moves.NONE:
         move_cost += 1
     spiders_pos[i] = env.apply_spider_move(spiders_pos[i], spider_move)
@@ -121,7 +121,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
 
     while i < len(spiders_pos):
         move = base_policy(spiders_pos[i], flies)
-        print(f"Computed base policy move {move} for spider {i}")
+        # print(f"Computed base policy move {move} for spider {i}")
         if move != moves.NONE:
             move_cost += 1
 
@@ -130,7 +130,35 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
             flies.remove(spiders_pos[i])
         i += 1
 
-    return move_cost + alpha * base_policy_cost_to_go(spiders_pos, flies)
+    print(f"g(x, {spider_move}) = {move_cost}, J(f({spiders_pos}, {flies})) = {base_policy_cost_to_go(spiders_pos.copy(), flies.copy())}")
+
+    return move_cost + base_policy_cost_to_go(spiders_pos.copy(), flies.copy())
+
+def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]], prev_moves: List[moves] = []) -> moves:
+    """
+    Find best move by minimizing over all possible moves for the current spider with a rollout policy.
+
+    Args:
+        spiders_pos: List of spider positions as (x, y) coordinates
+        flies: Set of (x, y) coordinates for all flies
+        prev_moves: List of previous moves for spiders during this action
+
+    Returns:
+        str: One of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NONE' moves
+    """
+    print(f"Spiders: {spiders_pos}, Flies: {flies}, Prev moves: {prev_moves}")
+    min_cost = float('inf')
+    best_move = moves.NONE
+
+    for move in moves:
+        cost = move_cost_to_go(spiders_pos.copy(), flies.copy(), prev_moves.copy(), move)
+        if cost < min_cost:
+            min_cost = cost
+            best_move = move
+
+    print(f"Best move: {best_move}, cost: {min_cost}")
+
+    return best_move
 
 def base_player() -> int:
     """
@@ -162,6 +190,50 @@ def base_player() -> int:
                 # print("All flies are eaten!")
                 running = False
                 break
+
+        if args.show:
+            viz.update_display()
+            pygame.time.wait(1000)
+
+    return running_cost
+
+def marollout_player() -> int:
+    """
+    Run base policy for all spiders until all flies are eaten.
+    Returns total cost for all spiders to eat all flies.
+
+    Returns:
+        int: Total cost for all spiders to eat all flies
+    """
+    running = True
+
+    running_cost = 0
+    prev_moves = []
+
+    while running:
+        if args.show:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    return running_cost
+
+        spiders, flies = env.spiders.copy(), env.flies.copy()
+        for current_spider in range(len(env.spiders)):
+            move = rollout_policy(spiders, flies, prev_moves)
+            if move != moves.NONE:
+                running_cost += 1
+            env.move_spider(current_spider, move)
+
+            # check if all flies are eaten
+            if not any(cell for row in env.grid for cell in row):
+                # print("All flies are eaten!")
+                running = False
+                break
+
+            if len(prev_moves) == len(env.spiders) - 1:
+                prev_moves = []
+            else:
+                prev_moves.append(move)
 
         if args.show:
             viz.update_display()
@@ -235,8 +307,11 @@ if __name__ == "__main__":
         print(f"Predicted cost: {predicted_cost}")
         print(f"Actual cost: {actual_cost}")
     elif args.mode == 'marollout':
-        predicted_cost = move_cost_to_go(env.spiders.copy(), env.flies.copy(), spider_move=moves.UP)
+        predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
+        actual_cost = marollout_player()
+
         print(f"Predicted cost: {predicted_cost}")
+        print(f"Actual cost: {actual_cost}")
     elif args.mode == 'test':
         for i in range(100000):
             seed = random.randint(0, 100000000)
