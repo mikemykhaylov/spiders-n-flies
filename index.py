@@ -1,4 +1,5 @@
 import pygame
+import random
 import sys
 import argparse
 from game import GridEnvironment, GridVisualization, moves
@@ -205,7 +206,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout'],
                        default='base', help='Mode: manual, base, rollout, or marollout')
+    parser.add_argument('--seed', type=int, help='Random seed')
     args = parser.parse_args()
+
+    if not args.seed:
+        args.seed = random.randint(0, 1000000)
+
+    print(f"Random seed: {args.seed}")
+    random.seed(args.seed)
 
     # Initialize environment with 5 flies and 2 spiders
     env = GridEnvironment(k=5, spider_positions=[(6,0), (6,0)])
