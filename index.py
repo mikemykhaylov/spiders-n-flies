@@ -1,8 +1,15 @@
+from copy import deepcopy
+from tqdm import tqdm
+
+import argparse
+import itertools
 import pygame
 import random
 import sys
-import argparse
-import itertools
+import time
+
+import multiprocessing as mp
+from functools import partial
 
 from game import GridEnvironment, GridVisualization, moves
 from typing import List, Tuple
@@ -342,6 +349,28 @@ def interactive_player():
 
         viz.update_display()
 
+def run_test_iteration(env, seed):
+    random.seed(seed)
+    env_copy = deepcopy(env)
+    env_copy.reset(k=5, spider_positions=[(6,0), (6,0)])
+
+    # Run base policy
+    start = time.time()
+    base_cost = base_player(deepcopy(env_copy), False)
+    base_time = (time.time() - start) * 1000
+
+    # Run rollout policy
+    start = time.time()
+    rollout_cost = rollout_player(deepcopy(env_copy), False)
+    rollout_time = (time.time() - start) * 1000
+
+    # Run marollout policy
+    start = time.time()
+    marollout_cost = marollout_player(deepcopy(env_copy), False)
+    marollout_time = (time.time() - start) * 1000
+
+    return (base_cost, base_time, rollout_cost, rollout_time, marollout_cost, marollout_time)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout', 'test'],
@@ -350,20 +379,25 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--test', action='store_true', help='Run tests')
     parser.add_argument('--seed', type=int, help='Random seed')
     args = parser.parse_args()
-    if args.mode == 'manual':
-        # set show to True for manual mode
-        args.show = True
 
     if not args.seed:
         args.seed = random.randint(0, 1000000)
-    if args.mode != 'test':
-        print(f"Random seed: {args.seed}")
+
+    print(f"Random seed: {args.seed}")
     random.seed(args.seed)
+
+    if args.mode == 'manual':
+        # set show to True for manual mode
+        args.show = True
 
     # Initialize environment with 5 flies and 2 spiders
     env = GridEnvironment(k=5, spider_positions=[(6,0), (6,0)], wait_delay=100)
 
     if args.show:
+        if args.mode == 'test':
+            print("Cannot show visualization in test mode")
+            sys.exit()
+
         viz = GridVisualization(env)
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
@@ -391,17 +425,39 @@ if __name__ == "__main__":
             print(f"Predicted cost: {predicted_cost}")
             print(f"Actual cost: {actual_cost}")
         case 'test':
-            for i in range(100000):
-                seed = random.randint(0, 100000000)
-                random.seed(seed)
-                env.reset(k=5, spider_positions=[(6,0), (6,0)])
-                if i % 10000 == 0:
-                    print(env.flies)
-                predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-                actual_cost = base_player()
-                if predicted_cost != actual_cost:
-                    print(f"Seed: {seed}, Predicted cost: {predicted_cost}, Actual cost: {actual_cost}")
-                    break
+            itercount = 100000
+            seeds = [random.randint(0, 100000000) for _ in range(itercount)]
+
+            # Create process pool
+            with mp.Pool() as pool:
+                # Map run_iteration across all seeds
+                results = list(tqdm(pool.imap(partial(run_test_iteration, env), seeds), total=itercount))
+
+            # Aggregate results
+            base_total = sum(r[0] for r in results)
+            base_time = sum(r[1] for r in results)
+            rollout_total = sum(r[2] for r in results)
+            rollout_time = sum(r[3] for r in results)
+            marollout_total = sum(r[4] for r in results)
+            marollout_time = sum(r[5] for r in results)
+
+            # compute average costs
+            base_avg = base_total / itercount
+            rollout_avg = rollout_total / itercount
+            marollout_avg = marollout_total / itercount
+
+            print(f"Base policy average cost: {base_avg}")
+            print(f"Rollout policy average cost: {rollout_avg}")
+            print(f"MARollout policy average cost: {marollout_avg}")
+
+            # compute average times
+            base_time_avg = base_time / itercount
+            rollout_time_avg = rollout_time / itercount
+            marollout_time_avg = marollout_time / itercount
+
+            print(f"Base policy average time: {base_time_avg} ms")
+            print(f"Rollout policy average time: {rollout_time_avg} ms")
+            print(f"MARollout policy average time: {marollout_time_avg} ms")
 
     pygame.quit()
     sys.exit()
