@@ -30,7 +30,7 @@ class GridEnvironment:
                 all_cells.remove(pos)
 
         random.shuffle(all_cells)
-        self.flies = set(all_cells[:k])
+        self.flies = sorted(all_cells[:k])
         for x, y in all_cells[:k]:
             self.grid[x][y] = True
 

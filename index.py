@@ -7,7 +7,7 @@ import itertools
 from game import GridEnvironment, GridVisualization, moves
 from typing import List, Tuple
 
-def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> moves:
+def base_policy(spider_pos: Tuple[int, int], flies: List[Tuple[int, int]]) -> moves:
     """
     Determine spider's move towards nearest fly using Manhattan distance.
     Prefers horizontal movement over vertical when distances are equal.
@@ -24,7 +24,7 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
     nearest_fly = None
 
     # Find nearest fly using Manhattan distance
-    for fly_pos in sorted(flies):
+    for fly_pos in flies:
         fly_x, fly_y = fly_pos
         distance = abs(spider_x - fly_x) + abs(spider_y - fly_y)
         if distance < min_distance:
@@ -54,7 +54,7 @@ def base_policy(spider_pos: Tuple[int, int], flies: set[Tuple[int, int]]) -> mov
     print(f"Spider at {spider_pos} is already at fly position {nearest_fly}")
     raise ValueError("Spider is already at fly position")
 
-def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]]) -> int:
+def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]]) -> int:
     """
     Calculate total cost for all spiders to eat all flies using base policy.
 
@@ -85,7 +85,7 @@ def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[
 
     return total_cost
 
-def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]], prev_moves: List[moves] = [], spider_move: moves = moves.NONE, alpha: float = 1.0) -> float:
+def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]], prev_moves: List[moves] = [], spider_move: moves = moves.NONE, alpha: float = 1.0) -> float:
     """
     Calculates g(state, (...prev_moves, spider_move, ..base_policy_moves)) for base policy.
     First, it moves the spider according to the spider_move, then runs the base policy for all remaining spiders.
@@ -136,7 +136,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
 
     return move_cost + base_policy_cost_to_go(spiders_pos.copy(), flies.copy())
 
-def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]], prev_moves: List[moves] = []) -> moves:
+def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]], prev_moves: List[moves] = []) -> moves:
     """
     Find best move by minimizing over all possible moves for the current spider with a rollout policy.
 
@@ -159,7 +159,7 @@ def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, i
 
     return best_move
 
-def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int]]) -> List[moves]:
+def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]]) -> List[moves]:
     """
     Finds best combination of moves for all spiders by minimizing over all possible moves for all spiders.
 
