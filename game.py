@@ -11,8 +11,9 @@ class moves(Enum):
     NONE = 'NONE'
 
 class GridEnvironment:
+    grid_size = 10
+
     def __init__(self, k: int, spider_positions: List[Tuple[int, int]], wait_delay: int = 1000):
-        self.grid_size = 10
         self.wait_delay = wait_delay
         self.reset(k, spider_positions)
 
@@ -43,8 +44,8 @@ class GridEnvironment:
             self.grid[new_x][new_y] = False
             self.flies.remove((new_x, new_y))
 
-    # method is static
-    def apply_spider_move(self, spider_pos: Tuple[int, int], move: moves) -> Tuple[int, int]:
+    @staticmethod
+    def apply_spider_move(spider_pos: Tuple[int, int], move: moves) -> Tuple[int, int]:
         """Return new spider position after applying move"""
         x, y = spider_pos
         dx, dy = 0, 0
@@ -63,8 +64,8 @@ class GridEnvironment:
             case _:
                 raise ValueError("Invalid direction. Use: UP, DOWN, LEFT, RIGHT")
 
-        new_x = max(0, min(self.grid_size - 1, x + dx))
-        new_y = max(0, min(self.grid_size - 1, y + dy))
+        new_x = max(0, min(GridEnvironment.grid_size - 1, x + dx))
+        new_y = max(0, min(GridEnvironment.grid_size - 1, y + dy))
         return (new_x, new_y)
 
     def wait(self):

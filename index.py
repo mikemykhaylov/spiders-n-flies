@@ -76,7 +76,7 @@ def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[
                 # No flies left to eat
                 break
 
-            spiders_pos[i] = env.apply_spider_move(spider_pos, move)
+            spiders_pos[i] = GridEnvironment.apply_spider_move(spider_pos, move)
             total_cost += 1
 
             if spiders_pos[i] in flies:
@@ -108,7 +108,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
         # print(f"Using previous move {prev_moves[i]} for spider {i}")
         if prev_moves[i] != moves.NONE:
             move_cost += 1
-        spiders_pos[i] = env.apply_spider_move(spiders_pos[i], prev_moves[i])
+        spiders_pos[i] = GridEnvironment.apply_spider_move(spiders_pos[i], prev_moves[i])
         if spiders_pos[i] in flies:
             flies.remove(spiders_pos[i])
         i += 1
@@ -116,7 +116,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
     # print(f"Using spider move {spider_move} for spider {i}")
     if spider_move != moves.NONE:
         move_cost += 1
-    spiders_pos[i] = env.apply_spider_move(spiders_pos[i], spider_move)
+    spiders_pos[i] = GridEnvironment.apply_spider_move(spiders_pos[i], spider_move)
     if spiders_pos[i] in flies:
         flies.remove(spiders_pos[i])
     i += 1
@@ -127,7 +127,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, in
         if move != moves.NONE:
             move_cost += 1
 
-        spiders_pos[i] = env.apply_spider_move(spiders_pos[i], move)
+        spiders_pos[i] = GridEnvironment.apply_spider_move(spiders_pos[i], move)
         if spiders_pos[i] in flies:
             flies.remove(spiders_pos[i])
         i += 1
