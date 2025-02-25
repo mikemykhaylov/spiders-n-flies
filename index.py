@@ -148,7 +148,6 @@ def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, i
     Returns:
         str: One of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NONE' moves
     """
-    print(f"Spiders: {spiders_pos}, Flies: {flies}, Prev moves: {prev_moves}")
     min_cost = float('inf')
     best_move = moves.NONE
 
@@ -157,8 +156,6 @@ def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, i
         if cost < min_cost:
             min_cost = cost
             best_move = move
-
-    print(f"Best move: {best_move}, cost: {min_cost}")
 
     return best_move
 
@@ -185,10 +182,14 @@ def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: set[Tuple[int, int
 
     return best_moves
 
-def base_player() -> int:
+def base_player(env: GridEnvironment, show: bool) -> int:
     """
     Run base policy for all spiders until all flies are eaten.
     Returns total cost for all spiders to eat all flies.
+
+    Arguments:
+        env: GridEnvironment -- The environment to run the policy on
+        show: bool -- Whether to show the visualization
 
     Returns:
         int: Total cost for all spiders to eat all flies
@@ -198,7 +199,7 @@ def base_player() -> int:
     running_cost = 0
 
     while running:
-        if args.show:
+        if show:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -212,20 +213,23 @@ def base_player() -> int:
 
             # check if all flies are eaten
             if not any(cell for row in env.grid for cell in row):
-                # print("All flies are eaten!")
                 running = False
                 break
 
-        if args.show:
+        if show:
             viz.update_display()
             env.wait()
 
     return running_cost
 
-def marollout_player() -> int:
+def marollout_player(env: GridEnvironment, show: bool) -> int:
     """
     Run base policy for all spiders until all flies are eaten.
     Returns total cost for all spiders to eat all flies.
+
+    Arguments:
+        env: GridEnvironment -- The environment to run the policy on
+        show: bool -- Whether to show the visualization
 
     Returns:
         int: Total cost for all spiders to eat all flies
@@ -236,7 +240,7 @@ def marollout_player() -> int:
     prev_moves = []
 
     while running:
-        if args.show:
+        if show:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -251,7 +255,6 @@ def marollout_player() -> int:
 
             # check if all flies are eaten
             if not any(cell for row in env.grid for cell in row):
-                # print("All flies are eaten!")
                 running = False
                 break
 
@@ -260,16 +263,20 @@ def marollout_player() -> int:
             else:
                 prev_moves.append(move)
 
-        if args.show:
+        if show:
             viz.update_display()
             env.wait()
 
     return running_cost
 
-def rollout_player() -> int:
+def rollout_player(env: GridEnvironment, show: bool) -> int:
     """
     Run base policy for all spiders until all flies are eaten.
     Returns total cost for all spiders to eat all flies.
+
+    Arguments:
+        env: GridEnvironment -- The environment to run the policy on
+        show: bool -- Whether to show the visualization
 
     Returns:
         int: Total cost for all spiders to eat all flies
@@ -278,7 +285,7 @@ def rollout_player() -> int:
     running_cost = 0
 
     while running:
-        if args.show:
+        if show:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -299,7 +306,7 @@ def rollout_player() -> int:
                 running = False
                 break
 
-        if args.show:
+        if show:
             viz.update_display()
             env.wait()
 
@@ -367,19 +374,19 @@ if __name__ == "__main__":
             interactive_player()
         case 'base':
             predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-            actual_cost = base_player()
+            actual_cost = base_player(env, args.show)
 
             print(f"Predicted cost: {predicted_cost}")
             print(f"Actual cost: {actual_cost}")
         case 'marollout':
             predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-            actual_cost = marollout_player()
+            actual_cost = marollout_player(env, args.show)
 
             print(f"Predicted cost: {predicted_cost}")
             print(f"Actual cost: {actual_cost}")
         case 'rollout':
             predicted_cost = base_policy_cost_to_go(env.spiders.copy(), env.flies.copy())
-            actual_cost = rollout_player()
+            actual_cost = rollout_player(env, args.show)
 
             print(f"Predicted cost: {predicted_cost}")
             print(f"Actual cost: {actual_cost}")
