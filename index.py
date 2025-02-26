@@ -376,7 +376,6 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--mode', choices=['manual', 'base', 'rollout', 'marollout', 'test'],
                        default='base', help='Mode: manual, base, rollout, or marollout')
     parser.add_argument('-s', '--show', action='store_true', help='Show visualization')
-    parser.add_argument('-t', '--test', action='store_true', help='Run tests')
     parser.add_argument('--seed', type=int, help='Random seed')
     args = parser.parse_args()
 
