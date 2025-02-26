@@ -20,7 +20,7 @@ def base_policy(spider_pos: Tuple[int, int], flies: List[Tuple[int, int]]) -> Mo
 
     Args:
         spider_pos: Tuple of (x, y) coordinates for spider position
-        flies: Set of (x, y) coordinates for all flies
+        flies: List of (x, y) coordinates for all flies
 
     Returns:
         str: One of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NONE' moves
@@ -67,7 +67,7 @@ def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple
 
     Args:
         spiders_pos: List of spider positions as (x, y) coordinates
-        flies: Set of (x, y) coordinates for all flies
+        flies: List of (x, y) coordinates for all flies
 
     Returns:
         int: Total cost for all spiders to eat all flies
@@ -92,7 +92,7 @@ def base_policy_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple
     return total_cost
 
 
-def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]], prev_moves=None,
+def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, int]], prev_moves: List[Moves] = None,
                     spider_move: Moves = Moves.NONE, alpha: float = 1.0) -> float:
     """
     Calculates g(state, (...prev_moves, spider_move, ...base_policy_moves)) for base policy.
@@ -101,7 +101,7 @@ def move_cost_to_go(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, i
 
     Args:
         spiders_pos: List of spider positions as (x, y) coordinates
-        flies: Set of (x, y) coordinates for all flies
+        flies: List of (x, y) coordinates for all flies
         prev_moves: List of previous moves for spiders during this action
         spider_move: Move for the current spider
         alpha: Discount factor for future costs
@@ -153,7 +153,7 @@ def marollout_policy(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, 
 
     Args:
         spiders_pos: List of spider positions as (x, y) coordinates
-        flies: Set of (x, y) coordinates for all flies
+        flies: List of (x, y) coordinates for all flies
         prev_moves: List of previous moves for spiders during this action
 
     Returns:
@@ -179,7 +179,7 @@ def rollout_policy(spiders_pos: List[Tuple[int, int]], flies: List[Tuple[int, in
 
     Args:
         spiders_pos: List of spider positions as (x, y) coordinates
-        flies: Set of (x, y) coordinates for all flies
+        flies: List of (x, y) coordinates for all flies
 
     Returns:
         List[Moves]: List of moves for all spiders
