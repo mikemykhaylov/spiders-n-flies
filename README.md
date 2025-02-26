@@ -2,8 +2,7 @@
 
 A grid-based environment where spiders chase flies using different movement policies. This project demonstrates various planning algorithms in a simple game-like setting.
 
-![Spiders and Flies](./public/spiders-flies.png)
-![Spiders and Flies](https://github.com/mikemykhaylov/spiders-n-flies/blob/3d3f737c19d07b59247e585473ac8e1a4140a117/public/screenshot.png)
+<img src="https://github.com/mikemykhaylov/spiders-n-flies/blob/3d3f737c19d07b59247e585473ac8e1a4140a117/public/screenshot.png" width="50%" alt="Spiders and Flies">
 
 ## Overview
 
