@@ -1,7 +1,6 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
+import seaborn as sns
 
 # Data from the experiment
 policies = ['Base Policy', 'Regular Rollout', 'Multiagent Rollout']
@@ -9,15 +8,9 @@ moves = [36.92, 22.31, 22.43]  # Average moves
 times = [0.128, 6.867, 2.618]  # Average time in ms
 
 # Create DataFrames for plotting
-moves_df = pd.DataFrame({
-    'Policy': policies,
-    'Average Moves': moves
-})
+moves_df = pd.DataFrame({'Policy': policies, 'Average Moves': moves})
 
-times_df = pd.DataFrame({
-    'Policy': policies,
-    'Time (ms)': times
-})
+times_df = pd.DataFrame({'Policy': policies, 'Time (ms)': times})
 
 # Set style
 sns.set_style("whitegrid")
